@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hollywood Studio | Analyzer</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { background-color: #FAF9F6; color: #2D3436; font-family: 'Outfit', sans-serif; }
+    
+    .navbar { background-color: transparent; padding-top: 20px; }
+    .navbar-brand { color: #2D3436 !important; font-weight: 800; font-size: 1.5rem; }
+    
+    .hero-section {
+      background-color: #FFFFFF; padding: 60px 40px; border-radius: 40px; 
+      box-shadow: 0 20px 50px rgba(161, 140, 209, 0.08); border: 1px solid rgba(0,0,0,0.02);
+    }
+    
+    .text-pastel {
+      background-clip: text;
+      background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    
+    /* Controles de formulario suaves y redondeados */
+    .form-select, .form-control {
+      background-color: #F8F9FA; color: #2D3436; border: 2px solid #F0F2F5; 
+      border-radius: 20px; padding: 15px 20px; font-weight: 500; box-shadow: none;
+    }
+    .form-select:focus, .form-control:focus {
+      background-color: #FFFFFF; border-color: #FBC2EB; box-shadow: 0 0 0 4px rgba(251, 194, 235, 0.2);
+    }
+    
+    /* Botón principal degradado */
+    .btn-pastel {
+      background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%); color: #fff !important; 
+      font-weight: 600; border-radius: 50px; padding: 15px 35px; font-size: 1.1rem; 
+      border: none; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(161, 140, 209, 0.3);
+    }
+    .btn-pastel:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(161, 140, 209, 0.5); }
+    .btn-pastel:disabled { background: #E0E0E0; box-shadow: none; transform: none; color: #999 !important;}
+    
+    /* Caja de resultados flotante */
+    .result-box {
+      background-color: #FFFFFF; border-radius: 30px; padding: 40px; margin-top: 40px; 
+      display: none; box-shadow: 0 15px 40px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03);
+    }
+    .result-header { color: #A18CD1; font-weight: 800; margin-bottom: 20px; }
+    
+    /* Píldoras de sugerencias muy amigables */
+    .prompt-pill {
+      display: inline-block; background-color: #F0F2F5; color: #636E72; font-size: 0.9rem;
+      padding: 8px 20px; border-radius: 30px; margin: 5px 5px 0 0; cursor: pointer;
+      transition: all 0.2s; font-weight: 500; border: 1px solid transparent;
+    }
+    .prompt-pill:hover { background-color: #FFFFFF; color: #A18CD1; border-color: #A18CD1; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(161, 140, 209, 0.15); }
+    
+    #loadingSpinner { display: none; margin-top: 30px; color: #A18CD1; }
+    footer { color: #999; font-size: 0.9rem; }
+    
+    /* Tablas bonitas */
+    table { width: 100%; margin-bottom: 1rem; border-collapse: separate; border-spacing: 0; }
+    th, td { padding: 1rem; border-bottom: 1px solid #F0F2F5; }
+    th { color: #A18CD1; font-weight: 600; background-color: #F8F9FA; }
+    th:first-child { border-top-left-radius: 15px; }
+    th:last-child { border-top-right-radius: 15px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">✨ Hollywood Studio</a>
+        <div class="d-flex">
+          <a class="btn btn-outline-secondary btn-sm rounded-pill px-4" href="index.html" style="font-weight: 500;">Volver</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container main-container mb-5 mt-4">
+    <div class="hero-section text-center">
+      <h1 class="display-5 fw-bold">Análisis de <span class="text-pastel">Formatos</span></h1>
+      <p class="lead mt-3 mx-auto" style="max-width: 700px; color: #636E72;">
+        Selecciona un algoritmo para obtener recomendaciones estratégicas o usa el lenguaje natural para explorar el catálogo.
+      </p>
+      
+      <div class="mb-4 text-start mx-auto mt-5" style="max-width: 650px;">
+        <label for="analysisSelect" class="form-label fw-bold ps-2" style="color: #2D3436;">Parámetros de Investigación:</label>
+        <select id="analysisSelect" class="form-select form-select-lg" onchange="toggleCustomInput()">
+          <option value="formato">🎬 Análisis 1: Estrategia de Formato (Películas vs Series)</option>
+          <option value="expansion">🌍 Análisis 2: Expansión Global (Top Países Productores)</option>
+          <option value="calidad">📉 Análisis 3: Tendencia de Calidad (Evolución Notas IMDB)</option>
+          <option value="libre" style="color: #A18CD1; font-weight: 600;">💬 Análisis 4: Prompt Libre (Lenguaje Natural)</option>
+        </select>
+        
+        <div id="customInputDiv" style="display: none;" class="mt-4">
+          <textarea id="customQuestion" class="form-control" rows="3" placeholder="Escribe tu consulta sobre el catálogo aquí..."></textarea>
+          
+          <div class="mt-3 text-center">
+            <span class="prompt-pill" onclick="fillPrompt('¿Cuántas películas hay registradas en total en la tabla?')">Total de películas</span>
+            <span class="prompt-pill" onclick="fillPrompt('¿Cuál es la película con mayor duración (runtime) y cuál es su título?')">Película más larga</span>
+            <span class="prompt-pill" onclick="fillPrompt('Calcula la nota media (imdb_score) de las comedias')">Media de comedias</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="analyzeBtn" class="btn btn-pastel mt-3">Procesar Datos con IA</button>
+      
+      <div id="loadingSpinner">
+        <div class="spinner-border" role="status"></div>
+        <p class="mt-2 fw-medium">Ejecutando consultas mediante SDK de Denodo...</p>
+      </div>
+    </div>
+
+    <div id="resultContainer" class="result-box">
+      <h4 class="result-header">✨ Informe de Resultados</h4>
+      <div id="aiResponseText" class="fs-5" style="line-height: 1.7; color: #4A5568;"></div>
+    </div>
+  </div>
+
+  <footer class="text-center mt-5 p-4">
+    <div class="container">
+      <p class="mb-0">Powered by Denodo AI SDK & Hollywood Script Studio | HackUDC 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    // Mostrar/ocultar caja de texto
+    function toggleCustomInput() {
+      if (document.getElementById("analysisSelect").value === "libre") {
+        document.getElementById("customInputDiv").style.display = "block";
+      } else {
+        document.getElementById("customInputDiv").style.display = "none";
+      }
+    }
+
+    // Rellenar la caja de texto al hacer clic en una píldora
+    function fillPrompt(text) {
+      const input = document.getElementById("customQuestion");
+      input.value = text;
+      input.focus();
+    }
+
+    // LÓGICA DE CONEXIÓN CON PYTHON (Intacta)
+    document.getElementById("analyzeBtn").addEventListener("click", function() {
+      const selectedAnalysis = document.getElementById("analysisSelect").value;
+      const customQ = document.getElementById("customQuestion").value;
+
+      if (selectedAnalysis === "libre" && customQ.trim() === "") {
+        alert("Por favor, escribe una pregunta o selecciona una sugerencia rápida.");
+        return;
+      }
+      
+      document.getElementById("loadingSpinner").style.display = "block";
+      document.getElementById("resultContainer").style.display = "none";
+      this.disabled = true; 
+      this.innerText = "Analizando...";
+
+      fetch("/analyze_script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo_analisis: selectedAnalysis, pregunta_libre: customQ })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("aiResponseText").innerHTML = marked.parse(data.recommendation);
+        document.getElementById("resultContainer").style.display = "block";
+        document.getElementById("analyzeBtn").disabled = false;
+        document.getElementById("analyzeBtn").innerText = "Procesar Datos con IA";
+        
+        // Scroll suave
+        document.getElementById("resultContainer").scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("aiResponseText").innerText = "Hubo un error de conexión con Denodo AI SDK.";
+        document.getElementById("resultContainer").style.display = "block";
+        document.getElementById("analyzeBtn").disabled = false;
+        document.getElementById("analyzeBtn").innerText = "Procesar Datos con IA";
+      });
+    });
+  </script>
+</body>
+</html>
